@@ -8,6 +8,7 @@ from utils.address import ADDRESS
 from utils.sensitive_attributes import SA
 from utils.tokenize import TOKENIZE
 from utils.day import DAY
+from utils.drop import DROP
 
 from utils.save_file import save_keyIndex, save_output
 from utils.save_csv_file import save_csv_keyIndex, save_csv_output
@@ -17,16 +18,16 @@ import argparse
 import os
 
 COLUMN_TYPE = {
-    'ID' : ["회원번호", "이름", "핸드폰번호", "차량번호"],
-    'Quasi' : ["성별", "나이", "주소", "생일", ],
+    'ID' : [ "이름", "차량번호"],
+    'Quasi' : ["성별", "나이", "주소"],
     'SA' : {
         'categorize' : ["전년도 누적금액", "전년도 누적 구매횟수", "최종구매일자", 
-                        "최종 주문 요일", "주말여부", "대분류", "중분류", "세분류", 
-                        "구매액"],
+                        "최종 주문 요일", "주말여부", "수량"],
         'pseudonym' : {
             "직업" : [""]
         },
-        'drop' : ['제품코드', '제품이름', '최종 주문시간', '수량']
+        'drop' : ["회원번호", "핸드폰번호", "생일", '제품코드', '제품이름', '최종 주문시간', '구매액'],
+        'continue' : ['대분류', '중분류', '세분류']
     }
 }
 
@@ -42,7 +43,6 @@ if __name__ == "__main__" :
     #df = pd.read_excel(MEDICAL_INFO["PATH"] + MEDICAL_INFO["NAME"], sheet_name="telco", data_only=True)
     #df = pd.read_excel(inputfile, sheet_name="telco", data_only=True)
     df = pd.read_csv(inputfile)
-    print(df.head(n=1))
     columns = list(df)
 
     for column in columns : 
@@ -60,6 +60,15 @@ if __name__ == "__main__" :
                 elif column == "주말여부" : 
                     TOKENIZE = TOKENIZE(df_column)
                     sr_column, df_keyInfo = TOKENIZE.substituting()
+                elif column == "전년도 누적금액" :
+                    SensAttr = SA(df_column, num_scale=500000, dollar_format=True)
+                    sr_column = SensAttr.categorizing()
+                elif column == "전년도 누적 구매횟수" : 
+                    SensAttr = SA(df_column, num_scale=50)
+                    sr_column = SensAttr.categorizing()
+                elif column == "수량" :
+                    SensAttr = SA(df_column, num_scale=5, start_num=1)
+                    sr_column = SensAttr.categorizing()
                 else : 
                     SensAttr = SA(df_column, num_scale=0)
                     sr_column = SensAttr.categorizing()
@@ -70,7 +79,10 @@ if __name__ == "__main__" :
                 sr_column, df_keyInfo = SensAttr.pseudonymization(pseudonym_type="Counter")
                 df[column] = sr_column
             if column in COLUMN_TYPE['SA']['drop'] : 
-                df.drop([column], axis='columns', inplace=True)
+                Drop = DROP(df_column)
+                sr_column = Drop.drop(df_column)
+                #df.drop([column], axis='columns', inplace=True)
+                df[column] = sr_column
 
         else : # 식별자 or 준식별자일 때
             if column == "회원번호" or column == "회원번호" or column == "핸드폰번호" : 
@@ -87,7 +99,7 @@ if __name__ == "__main__" :
                 df[column] = sr_column
             elif column == "성별" : 
                 # Sex
-                SEX = SEX(df_column)
+                SEX = SEX(df_column, sex_mark=['M', 'F'])
                 sr_column, df_keyInfo = SEX.substituting()
                 df[column] = sr_column
             elif column == "휴대전화" :
@@ -100,7 +112,8 @@ if __name__ == "__main__" :
             elif column == "주소" :
                 # Address
                 ADDRESS = ADDRESS(df_column)
-                sr_column= ADDRESS.categorizing()
+                #sr_column= ADDRESS.categorizing()
+                sr_column= ADDRESS.categorizing2()
                 df[column] = sr_column
             elif column == "차량번호" : 
                 df.drop([column], axis='columns', inplace=True)

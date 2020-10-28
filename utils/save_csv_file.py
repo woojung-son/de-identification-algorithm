@@ -6,8 +6,8 @@ sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 import pandas as pd
 
 def save_csv_keyIndex(df, file, sheetname) :
-    # file = C:\Users\sonwj\vscode python workplace\covid19-app\pseudonymization\data\k_ciber_security.csv
-    # sheetname = k_ciber_security
+    # file = C:\Users\sonwj\vscode python workplace\covid19-app\pseudonymization\data\k_cyber_security.csv
+    # sheetname = k_cyber_security
     filename = os.path.basename(file)
     file_dir = os.path.abspath(os.path.dirname(file))
 
@@ -68,18 +68,23 @@ def save_csv_output(df, file, sheetname) :
                         ) 
         '''
     else:
-        file_list = os.listdir(file_dir)
+        file_list = os.listdir(file_dir + "/output/")
         k_cyber_numlist = []
 
+        # file = k_cyber_security_output.csv
         for file in file_list :
-            if 'k_ciber_security' in file :
-                k_cyber_numlist.append(int(file[16]))
+            if 'k_cyber_security' in file :
+                print('file : {}'.format(file))
+                print('file[len(file) - 6] : {}'.format(file[len(file) - 6]))
+                k_cyber_numlist.append(int(file[len(file) - 6]))
+        
+        print('k_cyber_numlist : ', k_cyber_numlist)
         if len(k_cyber_numlist) == 0 :
             k_cyber_nextnum = 1
         else :
             k_cyber_nextnum = max(k_cyber_numlist) + 1
 
-        outputfile = file_dir + "/output/" + filename.replace(".csv") + "_output_" + str(k_cyber_nextnum) + ".csv"
+        outputfile = file_dir + "/output/" + filename.replace(".csv") + "_output (" + str(k_cyber_nextnum) + ").csv"
 
         '''
         with pd.ExcelWriter(outputfile, mode='a', engine='openpyxl') as writer: # pylint: disable=abstract-class-instantiated

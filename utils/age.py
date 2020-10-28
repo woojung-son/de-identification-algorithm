@@ -12,9 +12,12 @@ class AGE :
             base_age = int(element - (element % self.scale))
 
             if self.scale == 10 :
-                new_element = str(base_age) + "대"
+                if base_age >= 70 :
+                    new_element = "[70,100)"
+                else : # base_age < 70
+                    new_element = str(base_age) + "대"
             else :
-                new_element = "[" + str(base_age) + " ~ " + str(base_age + self.scale - 1) + "]"
+                new_element = "[" + str(base_age) + "," + str(base_age + self.scale) + ")"
 
             temp_age.append(new_element)
             

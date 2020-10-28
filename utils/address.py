@@ -41,4 +41,17 @@ class ADDRESS :
         
         sr_addr = pd.Series(temp_addr)
         return sr_addr
+    
+    def categorizing2(self) :
+        temp_sa = []
+        
+        for element in self.df_address :
+            temp_addr = element.split(" ")
+            new_element = temp_addr[0] + " " + temp_addr[1]
+            
+            temp_sa.append(new_element)
+        
+        sr_sa = pd.Series(temp_sa)
+        
+        return sr_sa
         

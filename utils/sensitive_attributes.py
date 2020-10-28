@@ -4,9 +4,11 @@ import numpy as np
 import datetime
 
 class SA :
-    def __init__(self, df_sa, exceptions = [], num_scale = -1, random_state = np.random.randint(100)) : 
+    def __init__(self, df_sa, exceptions = [], num_scale = -1, start_num = 0, dollar_format = False, random_state = np.random.randint(100)) : 
         self.df_sa = df_sa
         self.exceptions = exceptions
+        self.start_num = start_num
+        self.dollar_format = dollar_format
         np.random.seed(random_state)
         start_num = np.random.randint(100)
 
@@ -21,20 +23,30 @@ class SA :
     
         #print('matching_table_dict : {}'.format(self.matching_table_dict))
         
-
     def categorizing(self) :
         temp_sa = []
 
-        for element in self.df_sa :
-            base_sa = int(element - (element % self.num_scale))
+        if self.num_scale != -1 :
+            for element in self.df_sa :   
+                if type(element) == int :
+                    base_sa = int(element - (element % self.num_scale))
+                    
+                    if self.dollar_format :
+                        locale.setlocale(locale.LC_ALL, 'en_US')
+                        new_element = locale.format_string("%d", base_sa, grouping=True, monetary=True)
 
-            #new_element = "[" + str(base_age) + " ~ " + str(base_age + self.num_scale - 1) + "]"
-            
-            locale.setlocale(locale.LC_ALL, 'en_US')
-            new_element = locale.format_string("%d", base_sa, grouping=True, monetary=True)
-            
-            temp_sa.append(new_element)
-            
+                    # option to format with "[ , ]" or "( , )"
+                    if base_sa == 0 :
+                        new_element = "[" + str(base_sa + self.start_num) + "," + str(base_sa + self.num_scale) + ")"
+                    else :
+                        new_element = "[" + str(base_sa) + "," + str(base_sa + self.num_scale) + ")"
+
+                else :
+                    #print("Cannot use str format as a Numeric element.")
+                    new_element = element
+                
+                temp_sa.append(new_element)
+
         sr_sa = pd.Series(temp_sa)
         return sr_sa
 
@@ -91,3 +103,16 @@ class SA :
                                     'value' : list(self.matching_table_dict.keys())}, 
                                     index = range(len(self.matching_table_dict.values())))
         return sr_sa, df_sa_keyInfo
+
+    def drop(self, df_sa) :
+        temp_sa = []
+        
+        for element in df_sa :
+            new_element = element
+
+            temp_sa.append(new_element)
+        
+        sr_sa = pd.Series(temp_sa)
+        return sr_sa
+    
+

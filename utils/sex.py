@@ -2,12 +2,13 @@ import pandas as pd
 import numpy as np
 
 class SEX :
-    def __init__(self, df_sex, random_state = np.random.randint(100)) : 
+    def __init__(self, df_sex, sex_mark, random_state = np.random.randint(100)) : 
         self.df_sex = df_sex
+        self.sex_mark = sex_mark
         np.random.seed(random_state)
         #self.matching_table_dict = np.random.choice([1,2], 2, replace=False)
         #print(self.matching_table)
-        self.matching_table_dict = dict(zip(['남', '여'], np.random.choice([1,2], 2, replace=False)))
+        self.matching_table_dict = dict(zip(self.sex_mark, np.random.choice([1,2], 2, replace=False)))
 
     def masking(self, masking_digit = 13) :
         temp_name = []
@@ -31,6 +32,7 @@ class SEX :
         temp_sex = []
         for element in self.df_sex :
             if str(element) not in self.matching_table_dict.keys() : # 결측치 탐지
+                print('결측치 탐지', element)
                 self.matching_table_dict[str(element)] = max(self.matching_table_dict.values()) + 1
 
             temp_sex.append(self.matching_table_dict[element])
